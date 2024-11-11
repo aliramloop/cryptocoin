@@ -229,13 +229,160 @@ app.post('/create', async (req, res) => {
 
 })
 
-app.post('/login' , async(req , res) => {
+app.post('/login', async (req, res) => {
     const email = req.body.email;
     const password = req.body.password
 
     usersShow = await User.find({})
 
-    let filterUsers = usersShow.filter(users => users.email == email)
+    let filterUsers = usersShow.filter(users => users.email == email && users.password == password)
+
+    if (filterUsers.length == 0) {
+        await res.redirect('/register-login')
+    } else if (filterUsers[0] == undefined || filterUsers[0] == "undefined" || filterUsers == undefined || filterUsers == "undefined") {
+    } else {
+        let saveUUID = filterUsers[0].UUID
+        await res.send(`
+            <!DOCTYPE html>
+        <html lang="fa">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Login Is OK</title>
+            <style>
+                /* General Reset */
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                    font-size: 20px;
+                }
+        
+                body, html {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    color: #fff;
+                    /* background-color: #0a0d22; پس‌زمینه سایت */   
+                    height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    overflow: hidden;
+                }
+        
+                .alert-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.7); /* پس‌زمینه تیره برای overlay */
+                    backdrop-filter: blur(5px); /* بلور کردن پس‌زمینه */
+                    display: none; /* مخفی بودن overlay به‌طور پیش‌فرض */
+                    align-items: center;
+                    justify-content: center;
+                }
+        
+                .alert-box {
+                    background-color: #1e3a8a; /* رنگ پس‌زمینه alert box */
+                    border-radius: 15px;
+                    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.5);
+                    padding: 20px;
+                    width: 300px;
+                    animation: slideIn 0.5s ease forwards; /* انیمیشن برای ورود از بالا */
+                }
+        
+                .alert-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+        
+                .alert-header h2 {
+                    color: #3b82f6;
+                    margin-bottom: 10px;
+                }
+        
+                .alert-body {
+                    margin: 10px 0;
+                }
+        
+                .alert-body p {
+                    color: #d1d5db;
+                    font-size: 1em;
+                    line-height: 1.5;
+                }
+        
+                .alert-footer {
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 10px;
+                }
+        
+                .confirm-btn {
+                    background-color: #3b82f6; /* رنگ دکمه تایید */
+                    color: #fff;
+                    padding: 10px 15px;
+                    border: none;
+                    border-radius: 30px;
+                    cursor: pointer;
+                    transition: background-color 0.3s;
+                }
+        
+                .confirm-btn:hover {
+                    background-color: #9333ea; /* رنگ دکمه هنگام هاور */
+                }
+        
+                /* Animation */
+                @keyframes slideIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-100%); /* حرکت از بالای صفحه */
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0); /* قرار گرفتن در وسط */
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="alert-overlay" id="alert-overlay">
+                <div class="alert-box" id="alert-box">
+                    <div class="alert-header">
+                        <h2>Your Login In Your Account</h2>
+                    </div>
+                    <div class="alert-body">
+                    </div>
+                    <div class="alert-footer">
+                        <button class="confirm-btn" id="confirm-btn">OK</button>
+                    </div>
+                </div>
+            </div>
+        
+            <script>
+                const alertOverlay = document.getElementById('alert-overlay');
+                const confirmButton = document.getElementById('confirm-btn');
+        
+                // Ensure saveUUID is properly defined and converted to a string
+                const saveUUID = ${saveUUID}; // Replace this with the actual UUID value
+                localStorage.setItem("UUID", saveUUID);
+        
+                // نمایش alert box هنگام بارگذاری صفحه
+                window.onload = function() {
+                    alertOverlay.style.display = 'flex'; // نمایش alert box
+                };
+        
+                confirmButton.addEventListener('click', () => {
+                    alertOverlay.style.display = 'none'; // پنهان کردن alert box
+                    window.location.href = "/account-panel";
+                });
+            </script>
+        </body>
+        </html>
+        `);
+        
+            console.log("New UUID " + saveUUID);
+    }
 
     // if(usersShow = (await User.find({ email: email })) == true || (await User.find({ password: password })) == true){
     //     console.log("acount find");
@@ -246,9 +393,8 @@ app.post('/login' , async(req , res) => {
     // }
 
     console.log("Login Requst Send From Client\n" + `Email : ${email}\nPassword : ${password}`);
-    console.log(filterUsers[0] + "\n" + filterUsers[0].email);
     // console.log();
-    
+
 })
 
 app.listen(config.port, () => {
